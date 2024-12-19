@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Panchang Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; margin: 0; padding: 20px;
+            background-color: #f8f9fa; color: #333;
+        }
+        label, input {
+            display: block; margin-bottom: 10px;
+        }
+        button {
+            padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .dropdown {
+            border: 1px solid #ddd;
+            background-color: #fff;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 1000;
+            width: calc(100% - 20px);
+        }
+        .dropdown div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .dropdown div:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown.hidden {
+            display: none;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Panchang Details</h1>
+
+    <form id="panchang-form">
+        <label>City:
+            <input type="text" id="city-input" placeholder="Type your city..." oninput="fetchCitySuggestions()">
+        </label>
+        <div id="city-dropdown" class="dropdown hidden"></div>
+        <label>Latitude: <input type="number" id="latitude" step="any" required readonly></label>
+        <label>Longitude: <input type="number" id="longitude" step="any" required readonly></label>
+        <button type="button" onclick="fetchAdvancedPanchang()">Get Panchang Details</button>
+    </form>
+
+    <div id="results" class="results">
+        <h2>Results:</h2>
+        <div id="output">Results will appear here...</div>
+    </div>
+
+    <script>
+        let cityTimeout;
+
+        async function fetchCitySuggestions() {
+            const cityInput = document.getElementById('city-input').value;
+
+            clearTimeout(cityTimeout);
+
+            if (!cityInput.trim()) {
+                document.getElementById('city-dropdown').classList.add('hidden');
+                return;
+            }
+
+            cityTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/search_cities?query=${encodeURIComponent(cityInput)}`);
+                    const dropdown = document.getElementById('city-dropdown');
+
+                    if (response.ok) {
+                        const cities = await response.json();
+
+                        dropdown.innerHTML = cities.map(city => `
+                            <div onclick="selectCity(${city.latitude}, ${city.longitude}, '${city.city}, ${city.state}')">
+                                ${city.city}, ${city.state}
+                            </div>
+                        `).join('');
+                        dropdown.classList.remove('hidden');
+                    } else {
+                        dropdown.innerHTML = '<div>No results found</div>';
+                        dropdown.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error fetching city suggestions:", error);
+                }
+            }, 300); // Add debounce
+        }
+
+        function selectCity(lat, lng, cityName) {
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+            document.getElementById('city-input').value = cityName;
+            document.getElementById('city-dropdown').classList.add('hidden');
+        }
+
+        async function fetchAdvancedPanchang() {
+            const lat = document.getElementById('latitude').value;
+            const lng = document.getElementById('longitude').value;
+            const output = document.getElementById('output');
+
+            if (!lat || !lng) {
+                output.innerHTML = "Please select a valid city.";
+                return;
+            }
+
+            // Generate the current ISO 8601 datetime string dynamically
+            const now = new Date().toISOString();
+
+            try {
+                const response = await fetch(`/get_advanced_panchang?lat=${lat}&lng=${lng}&datetime=${encodeURIComponent(now)}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderPanchangResults(data);
+                } else {
+                    const errorData = await response.json();
+                    output.innerHTML = `Error: ${errorData.error || "Unable to fetch data"}`;
+                }
+            } catch (error) {
+                console.error("Error fetching Panchang details:", error);
+                output.innerHTML = "Error fetching Panchang details. Please try again.";
+            }
+        }
+
+        function renderPanchangResults(data) {
+            const output = document.getElementById('output');
+            if (data.status !== 'ok') {
+                output.innerHTML = "Invalid response from server.";
+                return;
+            }
+
+            const { vaara, sunrise, sunset, tithi, nakshatra, auspicious_period, inauspicious_period } = data.data;
+
+            output.innerHTML = `
+                <p><strong>Day:</strong> ${vaara}</p>
+                <p><strong>Sunrise:</strong> ${sunrise}</p>
+                <p><strong>Sunset:</strong> ${sunset}</p>
+                <h3>Tithi:</h3>
+                ${tithi.map(t => `<p>${t.name} (${t.paksha}) - Start: ${t.start}, End: ${t.end}</p>`).join('')}
+                <h3>Nakshatra:</h3>
+                ${nakshatra.map(n => `<p>${n.name} - Start: ${n.start}, End: ${n.end}</p>`).join('')}
+                <h3>Auspicious Periods:</h3>
+                ${auspicious_period.map(a => `<p>${a.name} - Start: ${a.period[0].start}, End: ${a.period[0].end}</p>`).join('')}
+                <h3>Inauspicious Periods:</h3>
+                ${inauspicious_period.map(i => `<p>${i.name} - Start: ${i.period[0].start}, End: ${i.period[0].end}</p>`).join('')}
+            `;
+        }
+    </script>
+</body>
+</html>
