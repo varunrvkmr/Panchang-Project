@@ -4,6 +4,7 @@ import os
 import sys
 import json
 from datetime import datetime, timezone
+from flask import send_from_directory
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 
@@ -24,25 +25,17 @@ app = Flask(__name__)
 AUDIO_FILES = {
     "vaara": {
         "Monday": "/static/audio/vaara/Monday.mp3",
-        "Tuesday": "/static/audio/vaara/Tuesday.mp3",
-        "Wednesday": "/static/audio/vaara/Wednesday.mp3",
-        "Thursday": "/static/audio/vaara/Thursday.mp3",
-        "Friday": "/static/audio/vaara/Friday.mp3",
-        "Saturday": "/static/audio/vaara/Saturday.mp3",
-        "Sunday": "/static/audio/vaara/Sunday.mp3",
+        "Tuesday": "/static/audio/vaara/Tuesday.mp3"
     },
     "tithi": {
-        "Dwadashi": "/static/audio/tithi/Dwadashi.mp3",
         "Trayodashi": "/static/audio/tithi/Trayodashi.mp3",
         "Pratipada": "/static/audio/tithi/Pratipada.mp3",
     },
     "nakshatra": {
         "Purva Ashadha": "/static/audio/nakshatra/Purva_Ashadha.mp3",
         "Revati": "/static/audio/nakshatra/Revati.mp3",
-        "Ashwini": "/static/audio/nakshatra/Ashwini.mp3",
     }
 }
-
 
 @app.route('/get_audio_sources', methods=['GET'])
 def get_audio_sources():
@@ -181,7 +174,7 @@ def fetch_advanced_panchang():
 @app.route('/send_whatsapp_message', methods=['POST'])
 def trigger_whatsapp_message():
     """
-    Trigger a WhatsApp message with Panchang details.
+    Trigger a WhatsApp message with Panchang details and an audio file.
     """
     try:
         data = request.get_json()
@@ -190,6 +183,7 @@ def trigger_whatsapp_message():
         timestamp = data.get('timestamp')
         tithi = data.get('tithi')
         nakshatra = data.get('nakshatra')
+        media_url = data.get('media_url', "https://purely-actual-marmoset.ngrok-free.app/static/audio/nakshatra/Purva_Ashadha.mp3")
 
         if not phone_number or not vaara or not timestamp or not tithi or not nakshatra:
             return jsonify({"error": "Missing required parameters"}), 400
@@ -197,12 +191,18 @@ def trigger_whatsapp_message():
         result = send_whatsapp_message(phone_number, vaara, timestamp, tithi, nakshatra)
 
         if result['status'] == 'success':
-            return jsonify({"message": "WhatsApp message sent successfully!", "sid": result['sid']}), 200
+            return jsonify({
+                "message": "WhatsApp message sent successfully!",
+                "sid": result['sid'],
+                "media_sid": result.get('media_sid')
+            }), 200
         else:
             return jsonify({"error": result['error']}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
     
 def format_iso_to_readable(iso_timestamp):
     try:
@@ -213,4 +213,5 @@ def format_iso_to_readable(iso_timestamp):
         return iso_timestamp  # Return original if parsing fails
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
+
