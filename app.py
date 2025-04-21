@@ -1,217 +1,130 @@
-from flask import Flask, jsonify, request, render_template
-from dotenv import load_dotenv
+from flask import Flask, request
+from db import db
+from models import User
+from location_utils import get_timezone_from_coordinates
+from prokerala import get_advanced_panchang, format_panchang_message, get_calendar_metadata, get_solstice_info, get_ritu_info
 import os
-import sys
-import json
-from datetime import datetime, timezone
-from flask import send_from_directory
+from messaging import send_whatsapp_message
+from dotenv import load_dotenv
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 
-from utils.panchang_api import get_advanced_panchang
-from openweather_api import get_coordinates
-from utils.whatsapp_sender import send_whatsapp_message
-
-# Load credentials from .env
 load_dotenv()
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-TOKEN_URL = "https://api.prokerala.com/token"
-BASE_API_URL = "https://api.prokerala.com/v2/astrology/panchang"
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./panchangam.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Audio Mapping
-AUDIO_FILES = {
-    "vaara": {
-        "Monday": "/static/audio/vaara/Monday.mp3",
-        "Tuesday": "/static/audio/vaara/Tuesday.mp3"
-    },
-    "tithi": {
-        "Trayodashi": "/static/audio/tithi/Trayodashi.mp3",
-        "Pratipada": "/static/audio/tithi/Pratipada.mp3",
-    },
-    "nakshatra": {
-        "Purva Ashadha": "/static/audio/nakshatra/Purva_Ashadha.mp3",
-        "Revati": "/static/audio/nakshatra/Revati.mp3",
-    }
-}
+db.init_app(app)
 
-@app.route('/get_audio_sources', methods=['GET'])
-def get_audio_sources():
-    """Fetch audio sources using predefined mappings."""
-    try:
-        lat = request.args.get('lat')
-        lng = request.args.get('lng')
-        datetime_str = request.args.get('datetime')
+VERIFY_TOKEN = "test123"
 
-        if not all([lat, lng, datetime_str]):
-            return jsonify({"error": "Missing required parameters"}), 400
-
-        data = get_advanced_panchang(lat, lng, datetime_str)
-
-        vaara = data['data']['vaara']
-        tithi_list = data['data']['tithi']
-        nakshatra_list = data['data']['nakshatra']
-        print("Raw vaara: ", vaara)
-        print("Raw tithi_list: ", tithi_list)
-        print("Raw nakshatra_list: ", nakshatra_list)
-
-        # Select the first Tithi and Nakshatra
-        selected_tithi = tithi_list[0]
-        selected_nakshatra = nakshatra_list[0]
-
-        print("Processed selected_tithi: ", selected_tithi)
-        print("Processed selected_nakshatra: ", selected_nakshatra)
-
-        # Extract readable timings
-        selected_tithi_start = format_iso_to_readable(selected_tithi['start'])
-        selected_tithi_end = format_iso_to_readable(selected_tithi['end'])
-        selected_nakshatra_start = format_iso_to_readable(selected_nakshatra['start'])
-        selected_nakshatra_end = format_iso_to_readable(selected_nakshatra['end'])
-
-        audio_files = {
-            "vaara": AUDIO_FILES['vaara'].get(vaara, "/static/audio/default.mp3"),
-            "tithi": AUDIO_FILES['tithi'].get(selected_tithi['name'], "/static/audio/default.mp3"),
-            "nakshatra": AUDIO_FILES['nakshatra'].get(selected_nakshatra['name'], "/static/audio/default.mp3"),
-        }
-
-        return jsonify({
-            "audio_files": audio_files,
-            "selected_tithi": {
-                "name": selected_tithi['name'],
-                "paksha": selected_tithi['paksha'],
-                "start": selected_tithi_start,
-                "end": selected_tithi_end
-            },
-            "selected_nakshatra": {
-                "name": selected_nakshatra['name'],
-                "start": selected_nakshatra_start,
-                "end": selected_nakshatra_end
-            }
-        }), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.before_request
+def log_requests():
+    if request.method == "POST":
+        print("Request:", request.method, request.path, request.get_json())
+    else:
+        print("Request:", request.method, request.path, request.args)
 
 
-@app.route('/')
-def index():
-    """Serve the front-end page."""
-    return render_template('index.html')
+@app.route("/", methods=["GET"])
+def home():
+    return "It works!", 200
 
-@app.route('/search_cities', methods=['GET'])
-def search_cities():
-    """Search US cities based on user input."""
-    query = request.args.get('query', '').lower().strip()
+@app.route("/webhook", methods=["GET"])
+def verify():
+    if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.verify_token") == VERIFY_TOKEN:
+        return request.args.get("hub.challenge"), 200
+    return "Verification failed", 403
 
-    if not query:
-        return jsonify([]), 200
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.get_json()
 
-    try:
-        with open('utils/data/us_cities.json', 'r') as f:
-            cities = json.load(f)
+    if data.get("object") == "whatsapp_business_account":
+        for entry in data.get("entry", []):
+            for change in entry.get("changes", []):
+                value = change.get("value", {})
+                messages = value.get("messages", [])
 
-        matching_cities = [
-            {
-                "city": city["city"],
-                "state": city["state"],
-                "latitude": city["latitude"],
-                "longitude": city["longitude"]
-            }
-            for city in cities
-            if query in city["city"].lower()
-        ]
+                for msg in messages:
+                    sender = msg.get("from")
+                    msg_type = msg.get("type")
 
-        # Return the top 10 matches
-        return jsonify(matching_cities[:10]), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+                    # ✅ User shared location
+                    if msg_type == "location":
+                        lat = msg["location"]["latitude"]
+                        lon = msg["location"]["longitude"]
+                        tz = get_timezone_from_coordinates(lat, lon)
 
+                        user = User.query.filter_by(phone_number=sender).first()
+                        if not user:
+                            user = User(phone_number=sender)
+                            db.session.add(user)
 
-@app.route('/get_city_suggestions', methods=['GET'])
-def get_city_suggestions():
-    """Fetch city suggestions and their coordinates based on user input."""
-    query = request.args.get('query', '').strip()
+                        user.latitude = lat
+                        user.longitude = lon
+                        user.timezone = tz
+                        user.is_subscribed = True
+                        db.session.commit()
 
-    if not query:
-        return jsonify({"error": "Query parameter is required."}), 400
+                        print(f"✅ Saved location for {sender}: {lat}, {lon} → {tz}")
 
-    try:
-        # Split the query into components (e.g., city, state, country)
-        parts = query.split(',')
-        city = parts[0].strip()
-        state = parts[1].strip() if len(parts) > 1 else None
-        country = parts[2].strip() if len(parts) > 2 else None
-
-        # Fetch coordinates using the OpenWeather API
-        results = get_coordinates(city, state, country)
-
-        return jsonify(results), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+                        try:
+                            panchang_data = get_advanced_panchang(lat=lat, lng=lon, tz_name=tz)
+                            calendar_info = get_calendar_metadata(tz_name=tz)
+                            ayanam = get_solstice_info(lat=lat, lon=lon, tz_name=tz)
+                            ritu = get_ritu_info(lat=lat, lon=lon, tz_name=tz)
 
 
-@app.route('/get_advanced_panchang', methods=['GET'])
-def fetch_advanced_panchang():
-    """Fetch Panchang details, auspicious times, and inauspicious times."""
-    try:
-        # Extract query parameters
-        lat = request.args.get('lat')
-        lng = request.args.get('lng')
-        datetime_str = request.args.get('datetime')
-        ayanamsa = request.args.get('ayanamsa', 1)  # Default to Lahiri
+                            message = format_panchang_message(
+                                data=panchang_data,
+                                calendar_info=calendar_info,
+                                ayanam=ayanam,
+                                ritu=ritu,
+                                timezone_name=tz
+                                
+                            )
+                            send_whatsapp_message(sender, message)
 
-        if not all([lat, lng, datetime_str]):
-            return jsonify({"error": "Missing required parameters"}), 400
+                        except Exception as e:
+                            print(f"❌ Failed to send Panchang message: {e}")
+                            send_whatsapp_message(sender, "You're subscribed! We'll send your daily Panchangam soon. 🕉️")
+                    
+                    # ✅ Handle plain text like "start"
+                    elif msg_type == "text":
+                        body = msg["text"]["body"].strip().lower()
+                        print(f"📨 Text received from {sender}: {body}")
 
-        # Call the consolidated API function
-        data = get_advanced_panchang(lat, lng, datetime_str, ayanamsa)
+                        if body == "start":
+                            print(f"✅ Detected START command from {sender}")
+                            reply = (
+                                "Hi there! 👋 I’m your daily Panchangam assistant.\n\n"
+                                "To get started, please share your *location* by tapping the 📎 (attach) button and selecting \"Location\"."
+                            )
+                            send_whatsapp_message(sender, reply)
 
-        return jsonify(data), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-@app.route('/send_whatsapp_message', methods=['POST'])
-def trigger_whatsapp_message():
-    """
-    Trigger a WhatsApp message with Panchang details and an audio file.
-    """
-    try:
-        data = request.get_json()
-        phone_number = data.get('phone_number')
-        vaara = data.get('vaara')
-        timestamp = data.get('timestamp')
-        tithi = data.get('tithi')
-        nakshatra = data.get('nakshatra')
-        media_url = data.get('media_url', "https://purely-actual-marmoset.ngrok-free.app/static/audio/nakshatra/Purva_Ashadha.mp3")
+    return "OK", 200
 
-        if not phone_number or not vaara or not timestamp or not tithi or not nakshatra:
-            return jsonify({"error": "Missing required parameters"}), 400
+@app.route("/test-panchang/<phone>")
+def test_panchang(phone):
+    user = User.query.filter_by(phone_number=phone).first()
+    if not user or not user.latitude or not user.longitude:
+        return "User or location not found", 404
 
-        result = send_whatsapp_message(phone_number, vaara, timestamp, tithi, nakshatra)
+    data = get_advanced_panchang(
+        lat=user.latitude,
+        lng=user.longitude,
+        tz_name=user.timezone
+    )
 
-        if result['status'] == 'success':
-            return jsonify({
-                "message": "WhatsApp message sent successfully!",
-                "sid": result['sid'],
-                "media_sid": result.get('media_sid')
-            }), 200
-        else:
-            return jsonify({"error": result['error']}), 500
+    message = format_panchang_message(data)
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Send to user on WhatsApp
+    send_whatsapp_message(user.phone_number, message)
 
+    return {"message": "Sent Panchangam to user."}
 
-    
-def format_iso_to_readable(iso_timestamp):
-    try:
-        dt = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
-        print("processed timestamp: ", dt.strftime('%d-%m-%Y %I:%M %p'))
-        return dt.strftime('%d-%m-%Y %I:%M %p')
-    except ValueError:
-        return iso_timestamp  # Return original if parsing fails
-    
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
-
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(port=5050, debug=True)
