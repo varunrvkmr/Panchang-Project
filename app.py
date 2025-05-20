@@ -1,19 +1,26 @@
 from flask import Flask, request
 from db import db
-from models import User
+#from models import User
+from models import db, UserDetail, CityDetail, ApiDetail, MessageLog, RituDetail, AyanamDetail
 from location_utils import get_timezone_from_coordinates
 from prokerala import get_advanced_panchang, format_panchang_message, get_calendar_metadata, get_solstice_info, get_ritu_info
 import os
 from messaging import send_whatsapp_message
 from dotenv import load_dotenv
+from flask_migrate import Migrate
+from sqlalchemy import text
+from helpers.cache_utils import get_cached_ayanam, get_cached_ritu
+from helpers.city_utils import get_or_create_city
 
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./panchangam.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./panchangam.db'
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
+migrate = Migrate(app, db)
 db.init_app(app)
 
 VERIFY_TOKEN = "test123"
@@ -56,15 +63,19 @@ def webhook():
                         lon = msg["location"]["longitude"]
                         tz = get_timezone_from_coordinates(lat, lon)
 
-                        user = User.query.filter_by(phone_number=sender).first()
+                        user = UserDetail.query.filter_by(phone_number=sender).first()
                         if not user:
-                            user = User(phone_number=sender)
+                            user = UserDetail(phone_number=sender)
                             db.session.add(user)
+
+                        # Determine nearest city and its ID
+                        city = get_or_create_city(lat, lon)
+                        city_id = city.city_id if city else None
+                        user.city_id = city_id
 
                         user.latitude = lat
                         user.longitude = lon
                         user.timezone = tz
-                        user.is_subscribed = True
                         db.session.commit()
 
                         print(f"✅ Saved location for {sender}: {lat}, {lon} → {tz}")
@@ -72,9 +83,8 @@ def webhook():
                         try:
                             panchang_data = get_advanced_panchang(lat=lat, lng=lon, tz_name=tz)
                             calendar_info = get_calendar_metadata(tz_name=tz)
-                            ayanam = get_solstice_info(lat=lat, lon=lon, tz_name=tz)
-                            ritu = get_ritu_info(lat=lat, lon=lon, tz_name=tz)
-
+                            ayanam = get_cached_ayanam(lat, lon, tz, city_id)
+                            ritu = get_cached_ritu(lat, lon, tz, city_id)
 
                             message = format_panchang_message(
                                 data=panchang_data,
@@ -82,14 +92,13 @@ def webhook():
                                 ayanam=ayanam,
                                 ritu=ritu,
                                 timezone_name=tz
-                                
                             )
                             send_whatsapp_message(sender, message)
 
                         except Exception as e:
                             print(f"❌ Failed to send Panchang message: {e}")
                             send_whatsapp_message(sender, "You're subscribed! We'll send your daily Panchangam soon. 🕉️")
-                    
+
                     # ✅ Handle plain text like "start"
                     elif msg_type == "text":
                         body = msg["text"]["body"].strip().lower()
@@ -105,9 +114,17 @@ def webhook():
 
     return "OK", 200
 
+@app.route("/test-db")
+def test_db():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return "✅ DB Connected!"
+    except Exception as e:
+        return f"❌ DB Error: {e}"
+
 @app.route("/test-panchang/<phone>")
 def test_panchang(phone):
-    user = User.query.filter_by(phone_number=phone).first()
+    user = UserDetail.query.filter_by(phone_number=phone).first()
     if not user or not user.latitude or not user.longitude:
         return "User or location not found", 404
 
@@ -126,5 +143,7 @@ def test_panchang(phone):
 
 if __name__ == "__main__":
     with app.app_context():
+        print("Creating tables...")
         db.create_all()
+        print("Done creating tables.")
     app.run(port=5050, debug=True)
