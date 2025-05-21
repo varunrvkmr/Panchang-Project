@@ -60,9 +60,7 @@ def should_send_now(user):
 
 def run_scheduler():
     logging.info("✅ Panchangam Scheduler Started")
-    logging.info(f"📤 Sending Panchangam to {user.phone_number}")
-    logging.error(f"❌ Failed to send to {user.phone_number}: {e}")
-    logging.warning(f"⚠️ Skipping user {user.phone_number}: Missing data")
+    
 
     with app.app_context():
         while True:
