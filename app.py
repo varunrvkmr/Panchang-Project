@@ -1,7 +1,8 @@
 from flask import Flask, request
-from db import db
+from models import db
 #from models import User
-from models import db, UserDetail, CityDetail, ApiDetail, MessageLog, RituDetail, AyanamDetail
+#from models import db, UserDetail, CityDetail, ApiDetail, MessageLog, RituDetail, AyanamDetail
+#from models import db
 from location_utils import get_timezone_from_coordinates
 from prokerala import get_advanced_panchang, format_panchang_message, get_calendar_metadata, get_solstice_info, get_ritu_info
 import os
@@ -20,8 +21,10 @@ app = Flask(__name__)
 #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
-migrate = Migrate(app, db)
+
 db.init_app(app)
+migrate = Migrate(app, db)
+from models import UserDetail, CityDetail, ApiDetail, MessageLog, RituDetail, AyanamDetail
 
 VERIFY_TOKEN = "test123"
 
@@ -82,9 +85,19 @@ def webhook():
 
                         try:
                             panchang_data = get_advanced_panchang(lat=lat, lng=lon, tz_name=tz)
+                            #panchang_data = 'panchang data'
+                            print("✅ panchang_data received")
+
                             calendar_info = get_calendar_metadata(tz_name=tz)
+                            #calendar_info = 'calendar info'
+                            print("✅ calendar_info received")
+
                             ayanam = get_cached_ayanam(lat, lon, tz, city_id)
+                            #ayanam = 'ayanam'
+                            print("✅ ayanam received:", ayanam, "| type:", type(ayanam))
+
                             ritu = get_cached_ritu(lat, lon, tz, city_id)
+                            print("✅ ritu received:", ritu, "| type:", type(ritu))
 
                             message = format_panchang_message(
                                 data=panchang_data,
@@ -93,7 +106,11 @@ def webhook():
                                 ritu=ritu,
                                 timezone_name=tz
                             )
+                            print("🧪 Type of message:", type(message))
+                            print("🧪 Preview of message:", message[:100])
+
                             send_whatsapp_message(sender, message)
+
 
                         except Exception as e:
                             print(f"❌ Failed to send Panchang message: {e}")
@@ -142,8 +159,4 @@ def test_panchang(phone):
     return {"message": "Sent Panchangam to user."}
 
 if __name__ == "__main__":
-    with app.app_context():
-        print("Creating tables...")
-        db.create_all()
-        print("Done creating tables.")
     app.run(port=5050, debug=True)

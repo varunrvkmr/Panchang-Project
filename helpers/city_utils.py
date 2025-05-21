@@ -1,7 +1,7 @@
 import os
 from opencage.geocoder import OpenCageGeocode
 from models import CityDetail
-from db import db
+from models import db
 
 # Load API key from environment
 geocoder = OpenCageGeocode(os.getenv("OPENCAGE_API_KEY"))
