@@ -12,6 +12,8 @@ from flask_migrate import Migrate
 from sqlalchemy import text
 from helpers.cache_utils import get_cached_ayanam, get_cached_ritu
 from helpers.city_utils import get_or_create_city
+import logging
+from datetime import datetime, date 
 
 
 load_dotenv()
@@ -27,6 +29,7 @@ migrate = Migrate(app, db)
 from models import UserDetail, CityDetail, ApiDetail, MessageLog, RituDetail, AyanamDetail
 
 VERIFY_TOKEN = "test123"
+logging.basicConfig(level=logging.INFO)
 
 @app.before_request
 def log_requests():
@@ -68,7 +71,11 @@ def webhook():
 
                         user = UserDetail.query.filter_by(phone_number=sender).first()
                         if not user:
-                            user = UserDetail(phone_number=sender)
+                            user = UserDetail(
+                                phone_number=sender,
+                                created_on=datetime.utcnow(),
+                                obsoleted_on=date(2099, 12, 31)
+                            )
                             db.session.add(user)
 
                         # Determine nearest city and its ID
@@ -81,23 +88,26 @@ def webhook():
                         user.timezone = tz
                         db.session.commit()
 
-                        print(f"✅ Saved location for {sender}: {lat}, {lon} → {tz}")
+                        logging.info(f"✅ Saved location for {sender}: {lat}, {lon} → {tz}")
 
                         try:
                             panchang_data = get_advanced_panchang(lat=lat, lng=lon, tz_name=tz)
                             #panchang_data = 'panchang data'
-                            print("✅ panchang_data received")
+                            #print("✅ panchang_data received")
+                            logging.info("✅ panchang_data received")
 
                             calendar_info = get_calendar_metadata(tz_name=tz)
-                            #calendar_info = 'calendar info'
-                            print("✅ calendar_info received")
+                            #print("✅ calendar_info received")
+                            logging.info("✅ calendar_info received")
 
                             ayanam = get_cached_ayanam(lat, lon, tz, city_id)
                             #ayanam = 'ayanam'
-                            print("✅ ayanam received:", ayanam, "| type:", type(ayanam))
+                            #print("✅ ayanam received:", ayanam, "| type:", type(ayanam))
+                            logging.info(f"✅ ayanam received: {ayanam} | type: {type(ayanam)}")
 
                             ritu = get_cached_ritu(lat, lon, tz, city_id)
-                            print("✅ ritu received:", ritu, "| type:", type(ritu))
+                            #print("✅ ritu received:", ritu, "| type:", type(ritu))
+                            logging.info(f"✅ ritu received: {ritu} | type: {type(ritu)}")
 
                             message = format_panchang_message(
                                 data=panchang_data,
@@ -106,14 +116,17 @@ def webhook():
                                 ritu=ritu,
                                 timezone_name=tz
                             )
-                            print("🧪 Type of message:", type(message))
-                            print("🧪 Preview of message:", message[:100])
+                            #print("🧪 Type of message:", type(message))
+                            #print("🧪 Preview of message:", message[:100])
+                            logging.info(f"🧪 Type of message: {type(message)}")
+                            logging.info(f"🧪 Preview of message: {message[:100]}")
 
                             send_whatsapp_message(sender, message)
 
 
                         except Exception as e:
-                            print(f"❌ Failed to send Panchang message: {e}")
+                            #print(f"❌ Failed to send Panchang message: {e}")
+                            logging.error(f"❌ Failed to send Panchang message: {e}")
                             send_whatsapp_message(sender, "You're subscribed! We'll send your daily Panchangam soon. 🕉️")
 
                     # ✅ Handle plain text like "start"
