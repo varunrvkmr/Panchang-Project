@@ -1,3 +1,5 @@
+# scheduler.py
+from pytz import timezone
 from datetime import datetime
 import os
 import time
@@ -65,16 +67,19 @@ def run_scheduler():
     with app.app_context():
         while True:
             try:
-                print(f"⏰ Checking users at {datetime.utcnow().isoformat()} UTC")
+                #print(f"⏰ Checking users at {datetime.utcnow().isoformat()} UTC")
+                logging.info(f"⏰ Checking users at {datetime.utcnow().isoformat()} UTC")
                 users = UserDetail.query.all()
 
                 for user in users:
                     if not all([user.phone_number, user.latitude, user.longitude, user.timezone]):
-                        print(f"⚠️ Skipping user {user.phone_number}: Missing data")
+                        #print(f"⚠️ Skipping user {user.phone_number}: Missing data")
+                        logging.info(f"⚠️ Skipping user {user.phone_number}: Missing data")
                         continue
 
                     if should_send_now(user):
-                        print(f"📤 Sending Panchangam to {user.phone_number}")
+                        #print(f"📤 Sending Panchangam to {user.phone_number}")
+                        logging.info(f"📤 Sending Panchangam to {user.phone_number}")
                         try:
                             panchang_data = get_advanced_panchang(
                                 lat=user.latitude,
@@ -99,18 +104,20 @@ def run_scheduler():
                             )
 
                             send_whatsapp_message(user.phone_number, message)
-                            print(f"✅ Message sent to {user.phone_number}")
+                            #print(f"✅ Message sent to {user.phone_number}")
+                            logging.info("✅ Message sent to {user.phone_number}")
 
                         except Exception as e:
-                            print(f"❌ Failed to send to {user.phone_number}: {e}")
+                            #print(f"❌ Failed to send to {user.phone_number}: {e}")
+                            logging.info("✅ Message sent to {user.phone_number}")
 
             except Exception as e:
-                print(f"❌ Scheduler loop failed: {e}")
+                #print(f"❌ Scheduler loop failed: {e}")
+                logging.info(f"❌ Scheduler loop failed: {e}")
 
             # Wait for 15 minutes before checking again
             time.sleep(900)
 
 # ---- Entry Point ----
-
 if __name__ == "__main__":
     run_scheduler()
