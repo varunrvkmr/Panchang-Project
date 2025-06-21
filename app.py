@@ -13,10 +13,34 @@ from sqlalchemy import text
 from helpers.cache_utils import get_cached_ayanam, get_cached_ritu
 from helpers.city_utils import get_or_create_city
 import logging
+from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime, date 
 
-
 load_dotenv()
+
+# ─── LOGGING SETUP ────────────────────────────────────────────────────────────────
+# ensure ./logs exists
+LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+handler = TimedRotatingFileHandler(
+    filename=os.path.join(LOG_DIR, "app.log"),
+    when="midnight",
+    interval=1,
+    backupCount=7,
+)
+handler.suffix = "%Y-%m-%d"
+handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s"))
+
+# configure root logger
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+# remove any default handlers (so we don’t double-log to console)
+root_logger.handlers.clear()
+# add our file handler and also log to console
+root_logger.addHandler(handler)
+root_logger.addHandler(logging.StreamHandler())
+# ─────────────────────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./panchangam.db'
@@ -34,10 +58,9 @@ logging.basicConfig(level=logging.INFO)
 @app.before_request
 def log_requests():
     if request.method == "POST":
-        print("Request:", request.method, request.path, request.get_json())
+        logging.info(f"Request: {request.method} {request.path} {request.get_json()}")
     else:
-        print("Request:", request.method, request.path, request.args)
-
+        logging.info(f"Request: {request.method} {request.path} {request.args}")
 
 @app.route("/", methods=["GET"])
 def home():
@@ -132,7 +155,8 @@ def webhook():
                     # ✅ Handle plain text like "start"
                     elif msg_type == "text":
                         body = msg["text"]["body"].strip().lower()
-                        print(f"📨 Text received from {sender}: {body}")
+                        #print(f"📨 Text received from {sender}: {body}")
+                        logging.info(f"📨 Text received from {sender}: {body}")
 
                         if body == "start":
                             print(f"✅ Detected START command from {sender}")
