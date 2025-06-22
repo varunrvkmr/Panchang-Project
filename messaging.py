@@ -35,8 +35,8 @@ def send_whatsapp_message(recipient_id, message_text):
         print(f"❌ Failed to send message: {response.status_code} {response.text}")
 '''
 def send_whatsapp_message(recipient_id, message_text):
-    print("📦 PHONE_NUMBER_ID:", PHONE_NUMBER_ID)
-    print("🔐 ACCESS_TOKEN:", ACCESS_TOKEN if ACCESS_TOKEN else "None")
+    #print("📦 PHONE_NUMBER_ID:", PHONE_NUMBER_ID)
+    #print("🔐 ACCESS_TOKEN:", ACCESS_TOKEN if ACCESS_TOKEN else "None")
 
     # ✅ Cast message_text safely
     try:
