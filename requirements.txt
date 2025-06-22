@@ -1,3 +1,7 @@
-flask 
-requests
-python-dotenv
+Flask-Migrate
+psycopg2-binary
+timezonefinder
+opencage
+dateutil
+pytz
+dotenv
