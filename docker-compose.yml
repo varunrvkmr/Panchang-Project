@@ -54,9 +54,17 @@ services:
       - .:/app
   ngrok:
     image: ngrok/ngrok:3
-    command: http web:5050 --authtoken=${NGROK_AUTHTOKEN}
+    # force ngrok to use its own binary as the entrypoint
+    entrypoint: ["ngrok"]
+    command:
+      # <-- Global flag, before "http"
+      - "--authtoken=${NGROK_AUTHTOKEN}"
+      - "http"
+      - "web:5050"
     ports:
       - "4040:4040"
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
