@@ -56,10 +56,9 @@ services:
   ngrok:
     image: ngrok/ngrok:latest
     volumes:
-      - /home/ubuntu/.ngrok2:/root/.ngrok2
+      - /home/ubuntu/.ngrok2:/root/.config/ngrok
     command: http web:5050
     ports:
       - "4040:4040"
-
 volumes:
   postgres_data:
