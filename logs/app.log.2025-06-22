@@ -1,0 +1,111 @@
+[2025-06-22 21:30:43,659] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-22 21:30:43,659] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-22 21:34:59,430] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-22 21:34:59,430] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-22 21:52:03,136] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-22 21:52:03,136] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-22 21:52:20,454] INFO: Request: GET / ImmutableMultiDict([])
+[2025-06-22 21:52:20,455] INFO: 192.168.65.1 - - [22/Jun/2025 21:52:20] "GET / HTTP/1.1" 200 -
+[2025-06-22 21:52:27,466] INFO: Request: GET /test-db ImmutableMultiDict([])
+[2025-06-22 21:52:27,484] INFO: 192.168.65.1 - - [22/Jun/2025 21:52:27] "GET /test-db HTTP/1.1" 200 -
+[2025-06-22 21:52:56,402] INFO: Request: GET /test-panchang/14089620962 ImmutableMultiDict([])
+[2025-06-22 21:52:56,413] ERROR: Exception on /test-panchang/14089620962 [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedTable: relation "user_detail" does not exist
+LINE 2: FROM user_detail 
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/app.py", line 182, in test_panchang
+    user = UserDetail.query.filter_by(phone_number=phone).first()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "user_detail" does not exist
+LINE 2: FROM user_detail 
+             ^
+
+[SQL: SELECT user_detail.user_id AS user_detail_user_id, user_detail.country_code AS user_detail_country_code, user_detail.area_code AS user_detail_area_code, user_detail.phone_number AS user_detail_phone_number, user_detail.city_id AS user_detail_city_id, user_detail.latitude AS user_detail_latitude, user_detail.longitude AS user_detail_longitude, user_detail.timezone AS user_detail_timezone, user_detail.created_on AS user_detail_created_on, user_detail.obsoleted_on AS user_detail_obsoleted_on 
+FROM user_detail 
+WHERE user_detail.phone_number = %(phone_number_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'phone_number_1': '14089620962', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+[2025-06-22 21:52:56,419] INFO: 192.168.65.1 - - [22/Jun/2025 21:52:56] "[35m[1mGET /test-panchang/14089620962 HTTP/1.1[0m" 500 -
+[2025-06-22 22:04:02,264] ERROR: Error: Directory migrations already exists and is not empty
+[2025-06-22 22:21:48,668] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-22 22:21:48,668] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-22 23:55:45,507] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-22 23:55:45,507] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-22 23:56:37,950] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-22 23:56:37,951] INFO: [33mPress CTRL+C to quit[0m

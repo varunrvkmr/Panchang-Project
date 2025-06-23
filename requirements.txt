@@ -1,7 +1,11 @@
 Flask-Migrate
 psycopg2-binary
-timezonefinder
+timezonefinder==6.0.1
 opencage
-dateutil
+python-dateutil
 pytz
 dotenv
+Flask
+flask_sqlalchemy
+flask_migrate
+celery[redis]

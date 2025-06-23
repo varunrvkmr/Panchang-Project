@@ -1,0 +1,57 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5050:5050"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://panchang_user:password@db:5432/panchang_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: panchang_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: panchang_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    command: celery -A tasks.celery worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://panchang_user:password@db:5432/panchang_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+
+  beat:
+    build: .
+    command: celery -A tasks.celery beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://panchang_user:password@db:5432/panchang_db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:

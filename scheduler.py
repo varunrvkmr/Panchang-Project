@@ -18,6 +18,7 @@ from helpers.cache_utils import get_cached_ayanam, get_cached_ritu
 from messaging import send_whatsapp_message
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import scheduler
 
 # Set up log directory
 LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
