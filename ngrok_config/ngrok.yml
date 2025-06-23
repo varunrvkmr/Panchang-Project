@@ -1,0 +1,9 @@
+version: "3"
+agent:
+  authtoken: 2yu3qx69MNxOLV5uN5WpuO7Vlsh_3Exp1zr2gajceGZ4we36a
+
+endpoints:
+  - name: webhook           # <— list item, not a mapping key
+    url: ""                 # empty → get a random https://*.ngrok.app address
+    upstream:
+      url: "http://web:5050"

@@ -55,14 +55,21 @@ services:
   
   ngrok:
     image: ngrok/ngrok:3
-    command: start --all --config /etc/ngrok/ngrok.yml
+    # Override the image’s default entrypoint to call the ngrok binary
+    entrypoint: ["ngrok"]
+    # Then append the “start” subcommand and config flags
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "/etc/ngrok/ngrok.yml"
     ports:
       - "4040:4040"
     depends_on:
       - web
     volumes:
-      # mount our host-side config into the container
       - ./ngrok_config/ngrok.yml:/etc/ngrok/ngrok.yml:ro
+
 
       
 volumes:
