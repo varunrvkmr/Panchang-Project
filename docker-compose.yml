@@ -57,7 +57,7 @@ services:
     image: ngrok/ngrok:latest
     volumes:
       - /home/ubuntu/snap/ngrok/280/.config/ngrok:/root/.ngrok2
-    command: ngrok http web:5050
+    command: http web:5050
     ports:
       - "4040:4040"
 
