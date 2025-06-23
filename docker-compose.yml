@@ -53,21 +53,15 @@ services:
     volumes:
       - .:/app
   ngrok:
-    image: ngrok/ngrok:3
-    # run as root so `config add-authtoken` can write to /home/ngrok/.config
-    user: root
-
-    # shell-form entrypoint to chain the two commands
-    entrypoint: [ "sh", "-c" ]
-    command:
-      - >
-        ngrok config add-authtoken "${NGROK_AUTHTOKEN}"
-        && ngrok http web:5050
-
+    build:
+      context: .
+      dockerfile: Dockerfile.ngrok
+      args:
+        NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     ports:
       - "4040:4040"
     depends_on:
       - web
-
+      
 volumes:
   postgres_data:

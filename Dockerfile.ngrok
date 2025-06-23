@@ -1,18 +1,15 @@
-# Dockerfile.ngrok
 FROM ngrok/ngrok:3
 
-# 1) Build‐time as root so we can write anywhere
 USER root
-ARG NGROK_AUTHTOKEN
 
-# 2) Save the token in root’s config, then copy it into /home/ngrok
-RUN ngrok config add-authtoken ${NGROK_AUTHTOKEN} \
- && mkdir -p /home/ngrok/.config/ngrok \
- && cp /root/.config/ngrok/ngrok.yml /home/ngrok/.config/ngrok/ngrok.yml \
- && chown -R ngrok:ngrok /home/ngrok/.config
+# copy in our script
+COPY entrypoint.sh /entrypoint.sh
 
-# 3) Switch back to the safer ngrok user for run-time
+# ensure it can run
+RUN chmod +x /entrypoint.sh
+
+# switch back to the ngrok user for runtime safety
 USER ngrok
 
-# 4) Default command: forward your web service on port 5050
-CMD ["http", "web:5050"]
+# use our script as the container’s entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
