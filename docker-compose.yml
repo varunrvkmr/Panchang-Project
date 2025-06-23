@@ -52,20 +52,11 @@ services:
       - redis
     volumes:
       - .:/app
-  
   ngrok:
-    # build from our new Dockerfile.ngrok
-    build:
-      context: .
-      dockerfile: Dockerfile.ngrok
-      args:
-        # this picks up from your shell or .env file
-        NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    # forward to the "web" container on port 5050:
-    command: http web:5050
+    image: ngrok/ngrok:3
+    command: http web:5050 --authtoken=${NGROK_AUTHTOKEN}
     ports:
       - "4040:4040"
-    depends_on:
-      - web
+
 volumes:
   postgres_data:
