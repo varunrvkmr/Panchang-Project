@@ -55,7 +55,7 @@ services:
   
   ngrok:
     image: ngrok/ngrok:latest
-    command: http --authtoken 2vjfCORLmuUwVEonajZEoGPNi0w_6tzJyNzVEdQgJwsgxZBtn web:5050
+    command: ngrok http --authtoken 2vjfCORLmuUwVEonajZEoGPNi0w_6tzJyNzVEdQgJwsgxZBtn web:5050
     ports:
       - "4040:4040"
 
