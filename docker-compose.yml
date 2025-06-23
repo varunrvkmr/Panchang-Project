@@ -54,13 +54,16 @@ services:
       - .:/app
   ngrok:
     image: ngrok/ngrok:3
-    # force ngrok to use its own binary as the entrypoint
-    entrypoint: ["ngrok"]
+    # run as root so `config add-authtoken` can write to /home/ngrok/.config
+    user: root
+
+    # shell-form entrypoint to chain the two commands
+    entrypoint: [ "sh", "-c" ]
     command:
-      # <-- Global flag, before "http"
-      - "--authtoken=${NGROK_AUTHTOKEN}"
-      - "http"
-      - "web:5050"
+      - >
+        ngrok config add-authtoken "${NGROK_AUTHTOKEN}"
+        && ngrok http web:5050
+
     ports:
       - "4040:4040"
     depends_on:
