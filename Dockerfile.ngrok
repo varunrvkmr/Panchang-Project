@@ -1,15 +1,17 @@
 FROM ngrok/ngrok:3
 
+# Switch to root so we can write config
 USER root
 
-# copy in our script
+# Copy in our script
 COPY entrypoint.sh /entrypoint.sh
 
-# ensure it can run
-RUN chmod +x /entrypoint.sh
+# Strip any Windows CRs and make it executable
+RUN sed -i 's/\r$//' /entrypoint.sh \
+ && chmod +x /entrypoint.sh
 
-# switch back to the ngrok user for runtime safety
+# Drop back to the unprivileged user
 USER ngrok
 
-# use our script as the container’s entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+# Launch via sh so entrypoint.sh is interpreted, not exec’d directly
+ENTRYPOINT ["sh", "/entrypoint.sh"]
