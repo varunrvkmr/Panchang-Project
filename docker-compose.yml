@@ -55,13 +55,11 @@ services:
   
   ngrok:
     image: ngrok/ngrok:latest
-    command: ngrok http --authtoken 2vjfCORLmuUwVEonajZEoGPNi0w_6tzJyNzVEdQgJwsgxZBtn web:5050
+    volumes:
+      - /home/ubuntu/snap/ngrok/280/.config/ngrok:/root/.ngrok2
+    command: ngrok http web:5050
     ports:
       - "4040:4040"
-
-
-
-
 
 volumes:
   postgres_data:
