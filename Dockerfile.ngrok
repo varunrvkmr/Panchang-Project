@@ -1,0 +1,11 @@
+# Dockerfile.ngrok
+FROM ngrok/ngrok:3
+
+# so you can pass your token in at build time
+ARG NGROK_AUTHTOKEN
+
+# this writes it into ~/.ngrok2/ngrok.yml
+RUN ngrok config add-authtoken ${NGROK_AUTHTOKEN}
+
+# default command: forward port 5050 on "web" service
+CMD ["http", "web:5050"]

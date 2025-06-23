@@ -54,11 +54,18 @@ services:
       - .:/app
   
   ngrok:
-    image: ngrok/ngrok:latest
-    volumes:
-      - /home/ubuntu/.ngrok2:/root/.config/ngrok
+    # build from our new Dockerfile.ngrok
+    build:
+      context: .
+      dockerfile: Dockerfile.ngrok
+      args:
+        # this picks up from your shell or .env file
+        NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    # forward to the "web" container on port 5050:
     command: http web:5050
     ports:
       - "4040:4040"
+    depends_on:
+      - web
 volumes:
   postgres_data:
