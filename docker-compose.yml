@@ -52,6 +52,15 @@ services:
       - redis
     volumes:
       - .:/app
+  
+  ngrok:
+    image: wernight/ngrok
+    volumes:
+      - ~/.ngrok2:/root/.ngrok2
+    command: http web:5050
+    ports:
+      - "4040:4040"
+
 
 volumes:
   postgres_data:
