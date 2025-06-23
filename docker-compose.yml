@@ -52,16 +52,17 @@ services:
       - redis
     volumes:
       - .:/app
-  ngrok:
-    build:
-      context: .
-      dockerfile: Dockerfile.ngrok
-      args:
-        NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    ports:
-      - "4040:4040"
-    depends_on:
-      - web
-      
+    ngrok:
+      image: ngrok/ngrok:3
+      command: start --all --config /etc/ngrok/ngrok.yml
+      ports:
+        - "4040:4040"
+      depends_on:
+        - web
+      volumes:
+        # mount our host-side config into the container
+        - ./ngrok_config/ngrok.yml:/etc/ngrok/ngrok.yml:ro
+
+
 volumes:
   postgres_data:
