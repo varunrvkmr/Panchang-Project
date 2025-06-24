@@ -63,6 +63,7 @@ services:
       - "--all"
       - "--config"
       - "/etc/ngrok/ngrok.yml"
+      - --log=stdout 
     ports:
       - "4040:4040"
     depends_on:
