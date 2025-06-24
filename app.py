@@ -114,7 +114,7 @@ def webhook():
                         logging.info(f"✅ Saved location for {sender}: {lat}, {lon} → {tz}")
 
                         try:
-                            logging.info("entering try block")
+                            '''
                             panchang_data = get_advanced_panchang(lat=lat, lng=lon, tz_name=tz)
                             #panchang_data = 'panchang data'
                             #print("✅ panchang_data received")
@@ -140,6 +140,8 @@ def webhook():
                                 ritu=ritu,
                                 timezone_name=tz
                             )
+                            '''
+                            message = 'first panchang message after subscribing'
                             #print("🧪 Type of message:", type(message))
                             #print("🧪 Preview of message:", message[:100])
                             logging.info(f"🧪 Type of message: {type(message)}")
