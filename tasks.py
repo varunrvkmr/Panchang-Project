@@ -53,7 +53,8 @@ beat_schedule = {}
 for tz_name in timezones:
     # localize today's 06:30 in that tz
     local_tz = pytz.timezone(tz_name)
-    local_dt = local_tz.localize(datetime.combine(today, time(6, 30)))
+    #local_dt = local_tz.localize(datetime.combine(today, time(6, 30)))
+    local_dt = local_tz.localize(datetime.combine(today, time(2, 55)))
     # convert to UTC
     utc_dt = local_dt.astimezone(pytz.utc)
 
@@ -77,7 +78,16 @@ def send_for_timezone(timezone_name: str):
     firing at the UTC‐converted 06:30 local time.
     """
     with flask_app.app_context():
-        users = UserDetail.query.filter_by(timezone=timezone_name).all()
+        #users = UserDetail.query.filter_by(timezone=timezone_name).all()
+        now = datetime.utcnow()
+        users = (
+            UserDetail.query
+            .filter(
+                UserDetail.timezone == timezone_name,
+                UserDetail.obsoleted_on > now
+            )
+            .all()
+        )
         for user in users:
             if not all([user.phone_number, user.latitude, user.longitude]):
                 logging.warning(f"⚠️ Skipping {user.phone_number}: missing data")
@@ -85,6 +95,7 @@ def send_for_timezone(timezone_name: str):
 
             try:
                 # fetch all pieces
+                '''
                 panchang_data = get_advanced_panchang(
                     lat=user.latitude,
                     lng=user.longitude,
@@ -97,7 +108,7 @@ def send_for_timezone(timezone_name: str):
                 ritu = get_cached_ritu(
                     user.latitude, user.longitude, user.timezone, user.city_id
                 )
-
+                
                 message = format_panchang_message(
                     data=panchang_data,
                     calendar_info=calendar_info,
@@ -105,6 +116,8 @@ def send_for_timezone(timezone_name: str):
                     ritu=ritu,
                     timezone_name=user.timezone
                 )
+                '''
+                message = 'daily test message'
 
                 send_whatsapp_message(user.phone_number, message)
                 logging.info(f"✅ Panchang sent to {user.phone_number} ({timezone_name})")

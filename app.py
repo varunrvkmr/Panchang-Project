@@ -166,6 +166,34 @@ def webhook():
                                 "To get started, please share your *location* by tapping the 📎 (attach) button and selecting \"Location\"."
                             )
                             send_whatsapp_message(sender, reply)
+                        # ─── new unsubscribe logic ──────────────────────────────
+                        elif body in {"stop", "unsubscribe", "cancel", "quit"}:
+                            user = UserDetail.query.filter_by(phone_number=sender).first()
+                            if not user:
+                                send_whatsapp_message(
+                                    sender,
+                                    "Looks like you’re not subscribed. Text ‘start’ to subscribe."
+                                )
+                            else:
+                                now = datetime.utcnow()
+                                # if obsoleted_on is *after* now, they're active → we unsubscribe them
+                                if user.obsoleted_on and user.obsoleted_on > now:
+                                    user.obsoleted_on = now
+                                    db.session.commit()
+                                    logging.info(f"🚫 Unsubscribed {sender}")
+                                    send_whatsapp_message(
+                                        sender,
+                                        "You’ve been unsubscribed from daily Panchangam. "
+                                        "Text ‘start’ anytime to re-subscribe. 🕉️"
+                                    )
+                                else:
+                                    # obsoleted_on is <= now → already unsubscribed
+                                    send_whatsapp_message(
+                                        sender,
+                                        "You’re already unsubscribed. Text ‘start’ to re-subscribe anytime."
+                                    )
+                        # ────────────────────────────────────────────────────────
+
 
     return "OK", 200
 
