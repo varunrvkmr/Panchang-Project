@@ -1,0 +1,95 @@
+[2025-06-23 00:16:52,971] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 00:16:52,972] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 00:18:29,928] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 00:18:29,929] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 08:58:21,730] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-23 08:58:21,730] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:00:23,466] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 09:00:23,467] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:05:54,027] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 09:05:54,027] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:07:32,452] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-23 09:07:32,452] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:09:49,819] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 09:09:49,819] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:16:57,360] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 09:16:57,360] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:18:50,295] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 09:18:50,295] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:23:51,886] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 09:23:51,887] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:25:47,339] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 09:25:47,339] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:26:35,600] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.4:5050
+[2025-06-23 09:26:35,600] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:27:35,705] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-23 09:27:35,705] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 09:29:55,666] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 09:29:55,667] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 20:31:10,047] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.6:5050
+[2025-06-23 20:31:10,047] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 20:32:41,690] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 20:32:41,691] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 20:46:43,712] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://172.22.0.5:5050
+[2025-06-23 20:46:43,712] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-23 21:32:50,809] INFO: Request: GET / ImmutableMultiDict([])
+[2025-06-23 21:32:50,811] INFO: 172.22.0.7 - - [23/Jun/2025 21:32:50] "GET / HTTP/1.1" 200 -
+[2025-06-23 21:44:02,750] INFO: Request: GET /webhook ImmutableMultiDict([('hub.mode', 'subscribe'), ('hub.challenge', '2061739540'), ('hub.verify_token', 'test123')])
+[2025-06-23 21:44:02,751] INFO: 172.22.0.7 - - [23/Jun/2025 21:44:02] "GET /webhook?hub.mode=subscribe&hub.challenge=2061739540&hub.verify_token=test123 HTTP/1.1" 200 -
+[2025-06-23 21:44:28,511] INFO: Request: POST /webhook {'object': 'whatsapp_business_account', 'entry': [{'id': '2148403575621767', 'changes': [{'value': {'messaging_product': 'whatsapp', 'metadata': {'display_phone_number': '15556402966', 'phone_number_id': '628578460336829'}, 'contacts': [{'profile': {'name': 'Varun Ravi Kumar'}, 'wa_id': '14089620962'}], 'messages': [{'from': '14089620962', 'id': 'wamid.HBgLMTQwODk2MjA5NjIVAgASGBQzQTM1RENBQzJDNTJDQkMxRUY1RAA=', 'timestamp': '1750715060', 'text': {'body': 'start'}, 'type': 'text'}]}, 'field': 'messages'}]}]}
+[2025-06-23 21:44:28,511] INFO: 📨 Text received from 14089620962: start
+[2025-06-23 21:44:28,742] INFO: 172.22.0.7 - - [23/Jun/2025 21:44:28] "POST /webhook HTTP/1.1" 200 -
+[2025-06-23 21:44:51,365] INFO: Request: POST /webhook {'object': 'whatsapp_business_account', 'entry': [{'id': '2148403575621767', 'changes': [{'value': {'messaging_product': 'whatsapp', 'metadata': {'display_phone_number': '15556402966', 'phone_number_id': '628578460336829'}, 'contacts': [{'profile': {'name': 'Varun Ravi Kumar'}, 'wa_id': '14089620962'}], 'messages': [{'from': '14089620962', 'id': 'wamid.HBgLMTQwODk2MjA5NjIVAgASGBQzQTY3NDRGQTE1MjI5RTY2MDkyOQA=', 'timestamp': '1750715084', 'text': {'body': 'start'}, 'type': 'text'}]}, 'field': 'messages'}]}]}
+[2025-06-23 21:44:51,365] INFO: 📨 Text received from 14089620962: start
+[2025-06-23 21:44:51,682] INFO: 172.22.0.7 - - [23/Jun/2025 21:44:51] "POST /webhook HTTP/1.1" 200 -
